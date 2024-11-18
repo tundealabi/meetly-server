@@ -1,4 +1,9 @@
-import { BadRequestException, Logger, ValidationPipe } from '@nestjs/common';
+import {
+  BadRequestException,
+  Logger,
+  ValidationPipe,
+  VersioningType,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';
@@ -24,6 +29,8 @@ async function bootstrap() {
     'app.versioning.version',
   );
 
+  app.setGlobalPrefix(globalPrefix);
+
   //collection of smaller middleware functions that set security-related HTTP headers
   app.use(helmet());
 
@@ -35,6 +42,12 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: version,
+    prefix: versioningPrefix,
+  });
 
   await app.listen(port);
 
