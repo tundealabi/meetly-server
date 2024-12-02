@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { RoomRepository } from './repository/room.repository';
 import { RoomModel } from './repository/schemas';
-import { CreateRoomDto } from './dtos';
+import { convertToMongoId } from '@/database/helpers';
 
 @Injectable()
 export class RoomService {
@@ -12,9 +12,9 @@ export class RoomService {
   // CREATE ROOM
   // -------------------------------------------------------
 
-  async create(dto: CreateRoomDto) {
+  async create(userId: string) {
     const createRoom: Partial<RoomModel> = {
-      createdBy: dto.username,
+      createdBy: convertToMongoId(userId),
     };
     return this.roomRepository.create(createRoom);
   }
@@ -24,6 +24,17 @@ export class RoomService {
   // -------------------------------------------------------
 
   async getRoomById(id: string) {
-    return this.roomRepository.findOne({ _id: id });
+    const result = await this.roomRepository.findOne(
+      { _id: id },
+      {},
+      {
+        populate: { path: 'createdBy', select: ['_id', 'username'] },
+      },
+    );
+    if (!result) return null;
+    return result.toObject<{
+      _id: string;
+      createdBy: { _id: string; username: string };
+    }>();
   }
 }

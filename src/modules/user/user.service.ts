@@ -21,4 +21,7 @@ export class UserService {
   async findOneBySocialAuthId(authId: string) {
     return this.userRepository.findOne({ socialAuthId: authId });
   }
+  async findUserById(id: string) {
+    return this.userRepository.findOne({ _id: id });
+  }
 }
