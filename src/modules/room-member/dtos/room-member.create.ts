@@ -1,7 +1,10 @@
 export class CreateRoomMemberDto {
   roomId!: string;
-  token?: string;
-  uid?: string;
+  rtcToken?: string;
+  rtmToken?: string;
+  screenShareRtcToken?: string;
+  screenShareUid?: number;
+  uid?: number;
   userId?: string;
   username!: string;
 }

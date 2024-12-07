@@ -18,6 +18,7 @@ import { controllerResponse } from '@/common/helpers';
 import { UserAuthJwtAuthGuard } from '../auth/guards';
 import { GetDataFromRequestUser } from '../auth/decorators';
 import { UserService } from '../user/user.service';
+import { UserModel } from '../user/repository/schemas';
 
 @Controller()
 export class RoomController {
@@ -76,11 +77,16 @@ export class RoomController {
     );
 
     if (existingRoomMember) {
+      const user = existingRoomMember.user as unknown as null | UserModel;
       return controllerResponse<Room>({
         data: {
           createdBy: room.createdBy,
+          profilePicture: user?.profilePicture ?? '',
           roomName: room._id,
-          token: existingRoomMember.token,
+          rtcToken: existingRoomMember.rtcToken,
+          rtmToken: existingRoomMember.rtmToken,
+          screenShareRtcToken: existingRoomMember.screenShareRtcToken,
+          screenShareUid: existingRoomMember.screenShareUid,
           uid: existingRoomMember.uid,
           userId: existingRoomMember._id.toHexString(),
           username: existingRoomMember.username,
@@ -108,8 +114,11 @@ export class RoomController {
 
     const newRoomMember = await this.roomMemberService.create({
       roomId: room._id,
-      token: session.token,
-      uid: session.uid,
+      rtcToken: session.userRtcToken,
+      rtmToken: session.userRtmToken,
+      screenShareRtcToken: session.screenShareToken,
+      screenShareUid: session.screenShareUid,
+      uid: session.userUid,
       userId,
       username: user.username,
     });
@@ -117,9 +126,13 @@ export class RoomController {
     return controllerResponse<Room>({
       data: {
         createdBy: room.createdBy,
+        profilePicture: user.profilePicture ?? '',
         roomName: room._id,
-        token: session.token,
-        uid: session.uid,
+        rtcToken: session.userRtcToken,
+        rtmToken: session.userRtmToken,
+        screenShareRtcToken: session.screenShareToken,
+        screenShareUid: session.screenShareUid,
+        uid: session.userUid,
         userId: newRoomMember.id,
         username: newRoomMember.username,
       },
@@ -148,17 +161,24 @@ export class RoomController {
 
     const newRoomMember = await this.roomMemberService.create({
       roomId: room._id,
-      token: session.token,
-      uid: session.uid,
+      rtcToken: session.userRtcToken,
+      rtmToken: session.userRtmToken,
+      screenShareRtcToken: session.screenShareToken,
+      screenShareUid: session.screenShareUid,
+      uid: session.userUid,
       username: dto.username,
     });
 
     return controllerResponse<Room>({
       data: {
         createdBy: room.createdBy,
+        profilePicture: '',
         roomName: room._id,
-        token: session.token,
-        uid: session.uid,
+        rtcToken: session.userRtcToken,
+        rtmToken: session.userRtmToken,
+        screenShareRtcToken: session.screenShareToken,
+        screenShareUid: session.screenShareUid,
+        uid: session.userUid,
         userId: newRoomMember.id,
         username: newRoomMember.username,
       },

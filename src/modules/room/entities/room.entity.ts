@@ -5,8 +5,12 @@ export class RoomDetails {
   roomName!: string;
 }
 export class Room extends RoomDetails {
-  token!: string;
-  uid!: string;
+  profilePicture!: string;
+  rtcToken!: string;
+  rtmToken!: string;
+  screenShareRtcToken!: string;
+  screenShareUid!: number;
+  uid!: number;
   userId!: string;
   username!: string;
 }

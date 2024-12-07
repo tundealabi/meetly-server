@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { RtcRole, RtcTokenBuilder } from 'agora-token';
+import { RtcRole, RtcTokenBuilder, RtmTokenBuilder } from 'agora-token';
 
 import { GenerateTokenDto } from './dtos';
 
@@ -26,9 +26,10 @@ export class VideoCallService {
     const tokenAndPrivilegeExpiresTs =
       currentTimestamp + dto.expirationTimeInSeconds;
 
-    const uid = this.generateUid().toString();
+    const uid = this.generateUid();
+    const screenShareUid = this.generateUid();
 
-    const token = RtcTokenBuilder.buildTokenWithUid(
+    const rtcToken = RtcTokenBuilder.buildTokenWithUid(
       this.appId,
       this.appCertificate,
       dto.roomName,
@@ -37,9 +38,29 @@ export class VideoCallService {
       tokenAndPrivilegeExpiresTs,
       tokenAndPrivilegeExpiresTs,
     );
+    const rtmToken = RtmTokenBuilder.buildToken(
+      this.appId,
+      this.appCertificate,
+      uid.toString(),
+      tokenAndPrivilegeExpiresTs,
+    );
+
+    const screenShareRtcToken = RtcTokenBuilder.buildTokenWithUid(
+      this.appId,
+      this.appCertificate,
+      dto.roomName,
+      screenShareUid,
+      RtcRole.PUBLISHER,
+      tokenAndPrivilegeExpiresTs,
+      tokenAndPrivilegeExpiresTs,
+    );
+
     return {
-      token,
-      uid,
+      userRtcToken: rtcToken,
+      userRtmToken: rtmToken,
+      userUid: uid,
+      screenShareToken: screenShareRtcToken,
+      screenShareUid: screenShareUid,
     };
   }
 

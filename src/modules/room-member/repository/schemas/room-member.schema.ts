@@ -18,10 +18,18 @@ export class RoomMemberModel {
   room!: Types.ObjectId;
 
   @Prop({ default: '' })
-  token!: string;
+  rtcToken!: string;
+  @Prop({ default: '' })
+  rtmToken!: string;
+
+  @Prop({ default: 0 })
+  uid!: number;
 
   @Prop({ default: '' })
-  uid!: string;
+  screenShareRtcToken!: string;
+
+  @Prop({ default: 0 })
+  screenShareUid!: number;
 
   @Prop({ ref: UserModel.name, type: SchemaTypes.ObjectId })
   user?: Types.ObjectId;
