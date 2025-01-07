@@ -64,7 +64,16 @@ export class RoomController {
     const room = await this.roomService.getRoomById(params.id);
 
     if (!room) throw new NotFoundException('Room does not exist');
-    // console.log()
+
+    const hostRecord = await this.roomMemberService.findRoomMemberByUserId(
+      room._id,
+      room.createdBy._id,
+    );
+
+    if (!hostRecord) {
+      throw new NotFoundException('Host does not exist for this meeting');
+    }
+
     const existingRoomMember =
       await this.roomMemberService.findRoomMemberByUserId(room._id, userId);
 
@@ -80,7 +89,7 @@ export class RoomController {
       const user = existingRoomMember.user as unknown as null | UserModel;
       return controllerResponse<Room>({
         data: {
-          createdBy: room.createdBy,
+          createdBy: { ...room.createdBy, uid: hostRecord.uid },
           profilePicture: user?.profilePicture ?? '',
           roomName: room._id,
           rtcToken: existingRoomMember.rtcToken,
@@ -125,7 +134,7 @@ export class RoomController {
 
     return controllerResponse<Room>({
       data: {
-        createdBy: room.createdBy,
+        createdBy: { ...room.createdBy, uid: hostRecord.uid },
         profilePicture: user.profilePicture ?? '',
         roomName: room._id,
         rtcToken: session.userRtcToken,
@@ -154,6 +163,15 @@ export class RoomController {
       throw new NotFoundException('Room does not exist');
     }
 
+    const hostRecord = await this.roomMemberService.findRoomMemberByUserId(
+      room._id,
+      room.createdBy._id,
+    );
+
+    if (!hostRecord) {
+      throw new NotFoundException('Host does not exist for this meeting');
+    }
+
     const session = this.vcService.createSession({
       expirationTimeInSeconds: 32424,
       roomName: room._id,
@@ -171,7 +189,7 @@ export class RoomController {
 
     return controllerResponse<Room>({
       data: {
-        createdBy: room.createdBy,
+        createdBy: { ...room.createdBy, uid: hostRecord.uid },
         profilePicture: '',
         roomName: room._id,
         rtcToken: session.userRtcToken,
@@ -197,6 +215,15 @@ export class RoomController {
       throw new NotFoundException('Room does not exist');
     }
 
+    const hostRecord = await this.roomMemberService.findRoomMemberByUserId(
+      room._id,
+      room.createdBy._id,
+    );
+
+    if (!hostRecord) {
+      throw new NotFoundException('Host does not exist for this meeting');
+    }
+
     this.logger.debug(
       {
         data: room,
@@ -207,7 +234,7 @@ export class RoomController {
 
     return controllerResponse<RoomDetails>({
       data: {
-        createdBy: room.createdBy,
+        createdBy: { ...room.createdBy, uid: hostRecord.uid },
         // roomMembers: [],
         roomName: room._id,
       },

@@ -1,7 +1,7 @@
 import { PickType } from '@nestjs/swagger';
 
 export class RoomDetails {
-  createdBy!: { _id: string; username: string };
+  createdBy!: { _id: string; uid: number; username: string };
   roomName!: string;
 }
 export class Room extends RoomDetails {
