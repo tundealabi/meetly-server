@@ -65,15 +65,6 @@ export class RoomController {
 
     if (!room) throw new NotFoundException('Room does not exist');
 
-    const hostRecord = await this.roomMemberService.findRoomMemberByUserId(
-      room._id,
-      room.createdBy._id,
-    );
-
-    if (!hostRecord) {
-      throw new NotFoundException('Host does not exist for this meeting');
-    }
-
     const existingRoomMember =
       await this.roomMemberService.findRoomMemberByUserId(room._id, userId);
 
@@ -87,6 +78,8 @@ export class RoomController {
 
     if (existingRoomMember) {
       const user = existingRoomMember.user as unknown as null | UserModel;
+
+      const hostRecord = await this.getHost(room._id, room.createdBy._id);
       return controllerResponse<Room>({
         data: {
           createdBy: { ...room.createdBy, uid: hostRecord.uid },
@@ -132,6 +125,8 @@ export class RoomController {
       username: user.username,
     });
 
+    const hostRecord = await this.getHost(room._id, room.createdBy._id);
+
     return controllerResponse<Room>({
       data: {
         createdBy: { ...room.createdBy, uid: hostRecord.uid },
@@ -163,15 +158,6 @@ export class RoomController {
       throw new NotFoundException('Room does not exist');
     }
 
-    const hostRecord = await this.roomMemberService.findRoomMemberByUserId(
-      room._id,
-      room.createdBy._id,
-    );
-
-    if (!hostRecord) {
-      throw new NotFoundException('Host does not exist for this meeting');
-    }
-
     const session = this.vcService.createSession({
       expirationTimeInSeconds: 32424,
       roomName: room._id,
@@ -186,6 +172,8 @@ export class RoomController {
       uid: session.userUid,
       username: dto.username,
     });
+
+    const hostRecord = await this.getHost(room._id, room.createdBy._id);
 
     return controllerResponse<Room>({
       data: {
@@ -215,15 +203,6 @@ export class RoomController {
       throw new NotFoundException('Room does not exist');
     }
 
-    const hostRecord = await this.roomMemberService.findRoomMemberByUserId(
-      room._id,
-      room.createdBy._id,
-    );
-
-    if (!hostRecord) {
-      throw new NotFoundException('Host does not exist for this meeting');
-    }
-
     this.logger.debug(
       {
         data: room,
@@ -234,11 +213,24 @@ export class RoomController {
 
     return controllerResponse<RoomDetails>({
       data: {
-        createdBy: { ...room.createdBy, uid: hostRecord.uid },
+        createdBy: { ...room.createdBy, uid: 0 },
         // roomMembers: [],
         roomName: room._id,
       },
       message: 'Room details fetched successfully',
     });
+  }
+
+  private async getHost(roomId: string, hostId: string) {
+    const hostRecord = await this.roomMemberService.findRoomMemberByUserId(
+      roomId,
+      hostId,
+    );
+
+    if (!hostRecord) {
+      throw new NotFoundException('Host does not exist for this meeting');
+    }
+
+    return hostRecord;
   }
 }
